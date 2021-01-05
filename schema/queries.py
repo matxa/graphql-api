@@ -30,6 +30,11 @@ class Query(graphene.ObjectType):
         email=graphene.NonNull(graphene.String),
         password=graphene.NonNull(graphene.String))
 
+    employee = graphene.Field(
+        Employee,
+        email=graphene.NonNull(graphene.String),
+        password=graphene.NonNull(graphene.String))
+
     def resolve_company(root, info, email, password):
         try:
             company = CompanyModel.objects.get(
@@ -41,3 +46,11 @@ class Query(graphene.ObjectType):
         except DoesNotExist:
             raise GraphQLError(
                 f"Manager with the email: {email} doesn't exist")
+
+    def resolve_employee(root, info, email, password):
+        try:
+            employee = EmployeeModel.objects.get(
+                email=email, password=password)
+            return employee
+        except DoesNotExist:
+            return None

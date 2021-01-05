@@ -4,6 +4,7 @@
    ▪️ CreateJob
    ▪️ CreateEmployee
 """
+from bson import ObjectId
 import graphene
 from graphql import GraphQLError
 from graphene_mongo import MongoengineObjectType
@@ -100,7 +101,7 @@ class CreateEmployee(graphene.Mutation):
         last_name = graphene.NonNull(graphene.String)
         email = graphene.NonNull(graphene.String)
 
-    employee = graphene.Field(Employee)
+    employee = graphene.Field(lambda: Employee)
         
     def mutate(root, info, first_name, last_name, email, manager_email):
         try:
@@ -127,8 +128,35 @@ class CreateEmployee(graphene.Mutation):
             raise GraphQLError("Employee with that email already exist")
 
 
+class AddEmployeeToJob(graphene.Mutation):
+    class Arguments:
+        job_id = graphene.NonNull(graphene.String)
+        employee_id = graphene.NonNull(graphene.String)
+
+    job = graphene.Field(lambda: Job)
+
+    def mutate(root, info, job_id, employee_id):
+        try:
+            job = JobModel.objects.get(id=ObjectId(job_id))
+            employee = EmployeeModel.objects.get(id=ObjectId(employee_id))
+            if ObjectId(employee_id) not in job.employees:
+                job.employees.append(ObjectId(employee_id))
+                job.save()
+            else:
+                raise GraphQLError("JOB already has employee")
+            if ObjectId(job_id) not in employee.jobs:
+                employee.jobs.append(ObjectId(job_id))
+                employee.save()
+            else:
+                raise GraphQLError("Employee already working for this JOB")
+            return AddEmployeeToJob(job=job)
+        except DoesNotExist:
+            return None
+
+
 class Mutation(graphene.ObjectType):
     create_manager = CreateManager.Field()
     create_company = CreateCompany.Field()
     create_job = CreateJob.Field()
     create_employee = CreateEmployee.Field()
+    add_employee_to_job = AddEmployeeToJob.Field()
