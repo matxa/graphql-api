@@ -215,6 +215,27 @@ class DeleteJob(graphene.Mutation):
             return None
 
 
+class DeleteCompany(graphene.Mutation):
+    class Arguments:
+        manager_email = graphene.NonNull(graphene.String)
+    
+    company = graphene.Field(lambda: Company)
+
+    def mutate(root, info, manager_email):
+        try:
+            company = CompanyModel.objects.get(
+                id=ManagerModel.objects.get(email=manager_email).id)
+            jobs = JobModel.objects.filter(manager_id=company.id)
+            for job in jobs:
+                job.delete()
+            employees = EmployeeModel.objects.filter(manager_id=company.id)
+            for employee in employees:
+                employee.delete()
+            company.delete()
+        except DoesNotExist:
+            return None
+
+
 class Mutation(graphene.ObjectType):
     create_manager = CreateManager.Field()
     create_company = CreateCompany.Field()
@@ -223,3 +244,4 @@ class Mutation(graphene.ObjectType):
     add_employee_to_job = AddEmployeeToJob.Field()
     delete_employee = DeleteEmployee.Field()
     delete_job = DeleteJob.Field()
+    delete_company = DeleteCompany.Field()
