@@ -3,6 +3,10 @@
    ▪️ CreateCompany
    ▪️ CreateJob
    ▪️ CreateEmployee
+   ▪️ AddEmployeeToJob
+   ▪️ DeleteEmployee
+   ▪️ DeleteJob
+   ▪️ DeleteManager
 """
 from bson import ObjectId
 import graphene
@@ -154,9 +158,68 @@ class AddEmployeeToJob(graphene.Mutation):
             return None
 
 
+class DeleteEmployee(graphene.Mutation):
+    class Arguments:
+        manager_email = graphene.NonNull(graphene.String)
+        email = graphene.NonNull(graphene.String)
+    
+    employee = graphene.Field(lambda: Employee)
+
+    def mutate(root, info, manager_email, email):
+        try:
+            # get employee
+            employee = EmployeeModel.objects.get(
+                manager_id=ManagerModel.objects.get(
+                    email=manager_email).id,
+                email=email)
+            # get the company the employee work for
+            company = CompanyModel.objects.get(
+                id=ManagerModel.objects.get(
+                    email=manager_email).id)
+            #  get all employee's Jobs
+            jobs = JobModel.objects.filter(
+                manager_id=ManagerModel.objects.get(email=manager_email).id,
+                employees__contains=employee.id)
+            for job in jobs:
+                # delete employee from job's employees' list
+                job.employees.remove(employee.id)
+                job.save()
+            # delete employee from employees' list in company
+            company.employees.remove(employee.id)
+            company.save()
+            employee.delete()
+            return temporary_employee
+        except DoesNotExist:
+            return None
+
+
+class DeleteJob(graphene.Mutation):
+    class Arguments:
+        manager_email = graphene.NonNull(graphene.String)
+        title = graphene.NonNull(graphene.String)
+
+    job = graphene.Field(lambda: Job)
+
+    def mutate(root, info, manager_email, title):
+        try:
+            job = JobModel.objects.get(
+                manager_id=ManagerModel.objects.get(email=manager_email).id,
+                title=title)
+            company = CompanyModel.objects.get(
+                id=ManagerModel.objects.get(email=manager_email).id)
+            company.jobs.remove(job.id)
+            company.save()
+            job.delete()
+            return job
+        except DoesNotExist:
+            return None
+
+
 class Mutation(graphene.ObjectType):
     create_manager = CreateManager.Field()
     create_company = CreateCompany.Field()
     create_job = CreateJob.Field()
     create_employee = CreateEmployee.Field()
     add_employee_to_job = AddEmployeeToJob.Field()
+    delete_employee = DeleteEmployee.Field()
+    delete_job = DeleteJob.Field()
