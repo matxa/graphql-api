@@ -43,6 +43,7 @@ class Job(Document):
 
 class Company(Document):
     meta = {'collection': 'companies'}
+    manager_id = ObjectIdField()
     name = StringField(required=True, max_length=20)
     description = StringField(required=True, max_length=400)
     jobs = ListField()

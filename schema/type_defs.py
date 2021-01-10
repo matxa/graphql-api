@@ -78,13 +78,13 @@ class Company(MongoengineObjectType):
     employees = List(Employee)
     
     def resolve_manager(root, info):
-        return ManagerModel.objects.get(id=root.id)
+        return ManagerModel.objects.get(id=root.manager_id)
 
     def resolve_job(root, info, title):
-        return JobModel.objects.get(manager_id=root.id, title=title)
+        return JobModel.objects.get(manager_id=root.manager_id, title=title)
 
     def resolve_jobs(root, info):
-        return JobModel.objects.filter(manager_id=root.id)
+        return JobModel.objects.filter(manager_id=root.manager_id)
 
     def resolve_employees(root, info):
-        return EmployeeModel.objects.filter(manager_id=root.id)
+        return EmployeeModel.objects.filter(manager_id=root.manager_id)

@@ -1,9 +1,13 @@
 """All Queries ⬇
-   ▪️ company ➡ Get all information about company given the rigth credentials
-       ↪ manager → get manager of company
-       ↪ job → get job by title
-       ↪ jobs → get all available jobs in in the company
-       ↪ employees → get all employees of the company
+    ▪️ company ➡ Get all information about company given the rigth credentials
+        ↪ manager → get manager of company
+        ↪ job → get job by title
+        ↪ jobs → get all available jobs in in the company
+        ↪ employees → get all employees of the company
+    ▪️ employee ➡ Get all information about employee given the right credentials
+        ↪ manager → get manager of employee
+        ↪ job → get job by title
+        ↪ jobs → get all the jobs the employee is working for in the company
 """
 import graphene
 from graphene_mongo import MongoengineObjectType
@@ -38,7 +42,7 @@ class Query(graphene.ObjectType):
     def resolve_company(root, info, email, password):
         try:
             company = CompanyModel.objects.get(
-                id=ManagerModel.objects.get(email=email).id)
+                manager_id=ManagerModel.objects.get(email=email).id)
             if check_pwd(password,
              ManagerModel.objects.get(email=email).password):
                 return company

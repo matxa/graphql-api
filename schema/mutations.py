@@ -39,19 +39,14 @@ class CreateCompany(graphene.Mutation):
 
     def mutate(root, info, name, manager_email, description):
         try:
-            if CompanyModel.objects.get(
-                id=ManagerModel.objects.get(
-                    email=manager_email).id) is not None:
-                    raise GraphQLError("Manager Already has a company")
             company = CompanyModel(
-                id=ManagerModel.objects.get(email=manager_email).id,
+                manager_id=ManagerModel.objects.get(email=manager_email).id,
                 name=name,
-                description=description
-                )
+                description=description)
             company.save()
             return CreateCompany(company=company)
-        except Exception as e:
-            raise GraphQLError(e)
+        except NotUniqueError:
+            raise GraphQLError("A company with that email already exist")
 
 
 class CreateManager(graphene.Mutation):
@@ -89,7 +84,7 @@ class CreateJob(graphene.Mutation):
                 description=description,
             )
             company = CompanyModel.objects.get(
-                id=ManagerModel.objects.get(email=manager_email).id)
+                manager_id=ManagerModel.objects.get(email=manager_email).id)
             job.save()
             company.jobs.append(job.id)
             company.save()
@@ -123,7 +118,7 @@ class CreateEmployee(graphene.Mutation):
                         email=email, 
                         password=str(uuid.uuid4()))
                 company = CompanyModel.objects.get(
-                    id=ManagerModel.objects.get(email=manager_email).id)
+                    manager_id=ManagerModel.objects.get(email=manager_email).id)
                 employee.save()
                 company.employees.append(employee.id)
                 company.save()
@@ -174,7 +169,7 @@ class DeleteEmployee(graphene.Mutation):
                 email=email)
             # get the company the employee work for
             company = CompanyModel.objects.get(
-                id=ManagerModel.objects.get(
+                manager_id=ManagerModel.objects.get(
                     email=manager_email).id)
             #  get all employee's Jobs
             jobs = JobModel.objects.filter(
@@ -206,7 +201,7 @@ class DeleteJob(graphene.Mutation):
                 manager_id=ManagerModel.objects.get(email=manager_email).id,
                 title=title)
             company = CompanyModel.objects.get(
-                id=ManagerModel.objects.get(email=manager_email).id)
+                manager_id=ManagerModel.objects.get(email=manager_email).id)
             company.jobs.remove(job.id)
             company.save()
             job.delete()
@@ -224,7 +219,7 @@ class DeleteCompany(graphene.Mutation):
     def mutate(root, info, manager_email):
         try:
             company = CompanyModel.objects.get(
-                id=ManagerModel.objects.get(email=manager_email).id)
+                manager_id=ManagerModel.objects.get(email=manager_email).id)
             jobs = JobModel.objects.filter(manager_id=company.id)
             for job in jobs:
                 job.delete()

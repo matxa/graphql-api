@@ -1,5 +1,5 @@
 """ ✅ Server/App Config """
-from flask import Flask
+from flask import Flask, redirect
 from flask_graphql import GraphQLView
 from flask_mongoengine import MongoEngine
 import graphene
@@ -12,6 +12,11 @@ from schema.mutations import Mutation
 app = Flask(__name__)
 app.config['MONGODB_SETTINGS'] = {"db": "ConTime"}
 db = MongoEngine(app)
+
+
+@app.route('/')
+def redirect_to_gql():
+    return redirect('/graphql')
 
 
 """GraphQL Server"""
