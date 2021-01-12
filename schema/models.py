@@ -1,5 +1,5 @@
 """All models ⬇
-[ ▪️ Manager, ▪️ Employee, ▪️ Job, ▪️ Company ]
+[ ▪️ Employee, ▪️ Company ]
 """
 from datetime import datetime
 from mongoengine import Document
@@ -12,8 +12,10 @@ from mongoengine.fields import (
 )
 
 
-class Manager(Document):
-    meta = {'collection': 'managers'}
+class Employee(Document):
+    meta = {'collection': 'employees'}
+    companies = ListField()
+    pending_requests = ListField()
     first_name = StringField(required=True, max_length=20)
     last_name = StringField(required=True, max_length=20)
     email = EmailField(required=True, max_length=50, unique=True)
@@ -21,31 +23,14 @@ class Manager(Document):
     date_created = DateTimeField(default=datetime.now)
 
 
-class Employee(Document):
-    meta = {'collection': 'employees'}
-    manager_id = ObjectIdField()
-    jobs = ListField()
-    first_name = StringField(required=True, max_length=20)
-    last_name = StringField(required=True, max_length=20)
-    email = EmailField(required=True, max_length=50)
-    password = StringField(required=True, max_length=80)
-    date_created = DateTimeField(default=datetime.now)
-
-
-class Job(Document):
-    meta = {'collection': 'jobs'}
-    manager_id = ObjectIdField()
-    title = StringField(required=True, unique=True)
-    description = StringField(required=True, max_length=400)
-    employees = ListField()
-    date_created = DateTimeField(default=datetime.now)
-
-
 class Company(Document):
     meta = {'collection': 'companies'}
-    manager_id = ObjectIdField()
-    name = StringField(required=True, max_length=20)
+    company_name = StringField(required=True, max_length=20)
     description = StringField(required=True, max_length=400)
-    jobs = ListField()
+    first_name = StringField(required=True, max_length=20)
+    last_name = StringField(required=True, max_length=20)
+    email = EmailField(required=True, max_length=50, unique=True)
+    password = StringField(required=True, max_length=80)
     employees = ListField()
+    pending_requests = ListField()
     date_created = DateTimeField(default=datetime.now)

@@ -13,15 +13,11 @@ import graphene
 from graphene_mongo import MongoengineObjectType
 from graphql import GraphQLError
 from .models import (
-    Manager as ManagerModel,
     Company as CompanyModel,
-    Job as JobModel,
     Employee as EmployeeModel
 )
 from mongoengine.errors import NotUniqueError, DoesNotExist
 from .type_defs import (
-    Manager,
-    Job,
     Employee,
     Company
 )
@@ -41,20 +37,20 @@ class Query(graphene.ObjectType):
 
     def resolve_company(root, info, email, password):
         try:
-            company = CompanyModel.objects.get(
-                manager_id=ManagerModel.objects.get(email=email).id)
+            company = CompanyModel.objects.get(email=email)
             if check_pwd(password,
-             ManagerModel.objects.get(email=email).password):
+             CompanyModel.objects.get(email=email).password):
                 return company
-            raise GraphQLError("Wrong password")
         except DoesNotExist:
             raise GraphQLError(
-                f"Manager with the email: {email} doesn't exist")
+                f"Company with the email: {email} doesn't exist")
 
     def resolve_employee(root, info, email, password):
         try:
-            employee = EmployeeModel.objects.get(
-                email=email, password=password)
-            return employee
+            employee = EmployeeModel.objects.get(email=email)
+            if check_pwd(password,
+             EmployeeModel.objects.get(email=email).password):
+                return employee
         except DoesNotExist:
-            return None
+            raise GraphQLError(
+                f"Employee with the email: {email} doesn't exist")
