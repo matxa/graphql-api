@@ -6,6 +6,7 @@
    ▪️ Decline Request
    ▪️ DeleteEmployee
    ▪️ DeleteCompany
+   ▪️ DeleteEmployeeFromCompany
 """
 from bson import ObjectId
 import graphene
@@ -197,6 +198,29 @@ class DeleteCompany(graphene.Mutation):
             return None
 
 
+class DeleteEmployeeFromCompany(graphene.Mutation):
+    class Arguments:
+        company_email = graphene.NonNull(graphene.String)
+        employee_id = graphene.NonNull(graphene.String)
+    
+    company = graphene.Field(lambda: Company)
+
+    def mutate(root, info, company_email, employee_id):
+        try:
+            company = CompanyModel.objects.get(email=company_email)
+            employee = EmployeeModel.objects.get(id=ObjectId(employee_id))
+            if employee.id in company.employees:
+                company.employees.remove(employee.id)
+                employee.companies.remove(company.id)
+                employee.save()
+                company.save()
+                return company
+            else:
+                raise GraphQLError(f"{employee_id} is not your employee")
+        except DoesNotExist:
+            raise GraphQLError("A company with that email doesn't exist")
+
+
 class Mutation(graphene.ObjectType):
     create_company = CreateCompany.Field()
     create_employee = CreateEmployee.Field()
@@ -205,3 +229,4 @@ class Mutation(graphene.ObjectType):
     request_employee = RequestEmployee.Field()
     accept_request = AcceptRequest.Field()
     decline_request = DeclineRequest.Field()
+    delete_employee_from_compnay = DeleteEmployeeFromCompany.Field()
