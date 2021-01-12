@@ -9,6 +9,7 @@
    ▪️ DeleteEmployeeFromCompany
 """
 from bson import ObjectId
+import bcrypt
 import graphene
 from graphql import GraphQLError
 from graphene_mongo import MongoengineObjectType
@@ -66,7 +67,7 @@ class CreateEmployee(graphene.Mutation):
                 first_name=first_name,
                 last_name=last_name,
                 email=email,
-                password=hash_pwd(password))
+                password=bcrypt.hashpw(password, bcrypt.gensalt(14)))
             employee.save()
             return CreateEmployee(employee=employee)
         except NotUniqueError:
