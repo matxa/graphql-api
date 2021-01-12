@@ -1,13 +1,10 @@
 """All Queries ⬇
     ▪️ company ➡ Get all information about company given the rigth credentials
-        ↪ manager → get manager of company
-        ↪ job → get job by title
-        ↪ jobs → get all available jobs in in the company
-        ↪ employees → get all employees of the company
+        ↪ employees
+        ↪ pending_requests
     ▪️ employee ➡ Get all information about employee given the right credentials
-        ↪ manager → get manager of employee
-        ↪ job → get job by title
-        ↪ jobs → get all the jobs the employee is working for in the company
+        ↪ companies
+        ↪ pending_requests
 """
 import graphene
 from graphene_mongo import MongoengineObjectType
