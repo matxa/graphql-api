@@ -14,6 +14,7 @@ graphene-mongo==0.2.13
 graphql-core==2.3.2
 graphql-relay==2.0.1
 graphql-server-core==1.2.0
+gunicorn==20.0.4
 idna==3.1
 iso8601==0.1.13
 itsdangerous==1.1.0
