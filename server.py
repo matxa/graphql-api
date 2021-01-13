@@ -6,11 +6,19 @@ import graphene
 from schema.queries import Query
 from mongoengine import connect
 from schema.mutations import Mutation
+import os
 
 
 """Flask App"""
 app = Flask(__name__)
-app.config['MONGODB_SETTINGS'] = {"db": "ConTime"}
+
+"""DATABASE CONNECTION"""
+DB_USER = os.getenv("DB_USER")
+DB_PWD = os.getenv("DB_PWD")
+DB_URI = f"mongodb+srv://{DB_USER}:{DB_PWD}@cluster0.qgdv3.mongodb.net/\
+ConTime?retryWrites=true&w=majority"
+
+app.config["MONGODB_HOST"] = DB_URI
 db = MongoEngine(app)
 
 
@@ -29,6 +37,4 @@ app.add_url_rule('/graphql', view_func=GraphQLView.as_view(
 
 
 if __name__ == '__main__':
-    app.run(
-        debug=True
-    )
+    app.run()
