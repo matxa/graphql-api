@@ -13,9 +13,7 @@ import os
 app = Flask(__name__)
 
 """DATABASE CONNECTION"""
-DB_USER = os.getenv("DB_USER")
-DB_PWD = os.getenv("DB_PWD")
-DB_URI = f"mongodb+srv://{DB_USER}:{DB_PWD}@cluster0.qgdv3.mongodb.net/\
+DB_URI = f"mongodb+srv://root:root@cluster0.qgdv3.mongodb.net/\
 ConTime?retryWrites=true&w=majority"
 
 app.config["MONGODB_HOST"] = DB_URI
